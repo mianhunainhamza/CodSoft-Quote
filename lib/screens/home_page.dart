@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
+import 'package:quote_app/widgets/drawer.dart';
 import '../models/quote.dart';
 
 class HomePage extends StatefulWidget {
@@ -12,7 +12,24 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  bool isSaved = false;
+  bool isChange = false;
   Future<Quote> futureQuote = QuoteService.getQuote();
+  List<Quote> quotes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadQuotesFromStorage();
+  }
+
+  // Function to load quotes from local storage
+  Future<void> _loadQuotesFromStorage() async {
+    List<Quote> loadedQuotes = await QuoteService.loadQuotesFromLocal();
+    setState(() {
+      quotes = loadedQuotes;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +106,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
+          //buttons
           Align(
             alignment: Alignment.bottomCenter,
             child: Row(
@@ -98,9 +116,11 @@ class _HomePageState extends State<HomePage> {
                   margin: const EdgeInsets.all(20),
                   child: GestureDetector(
                     onTap: () {
-                      // Handle the like action
+                      _addQuoteToStorage();
                     },
-                    child: const Icon(CupertinoIcons.heart, color: CupertinoColors.white, size: 37,),
+                    child: isSaved
+                        ? const Icon(CupertinoIcons.heart_fill, color: CupertinoColors.white, size: 37,)
+                        : const Icon(CupertinoIcons.heart, color: CupertinoColors.white, size: 37,),
                   ),
                 ),
                 Container(
@@ -108,21 +128,46 @@ class _HomePageState extends State<HomePage> {
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
+                        isChange = !isChange;
+                        isSaved = false;
                         futureQuote = QuoteService.getQuote(); // Fetch a new quote
                       });
                     },
-                    child: const Icon(Icons.add_circle, color: CupertinoColors.white, size: 80,),
+                    child: isChange
+                        ? const Icon(CupertinoIcons.arrow_clockwise_circle_fill, color: CupertinoColors.white, size: 80,)
+                        : const Icon(CupertinoIcons.arrow_counterclockwise_circle_fill, color: CupertinoColors.white, size: 80,),
                   ),
                 ),
                 Container(
                   margin: const EdgeInsets.all(20),
-                  child: const Icon(CupertinoIcons.share, color: CupertinoColors.white, size: 35,),
+                  child: GestureDetector(
+                    onTap: () {
+                    },
+                    child: const Icon(CupertinoIcons.share, color: CupertinoColors.white, size: 35,),
+                  ),
                 ),
               ],
             ),
           )
         ],
       ),
+      //Drawer
+      drawer: const CustomDrawer(route: "HomePage"),
     );
+  }
+
+  // Function to add a new quote to local storage
+  Future<void> _addQuoteToStorage() async {
+    Quote currentQuote = await futureQuote;
+
+    if (!quotes.contains(currentQuote)) {
+      quotes.add(currentQuote);
+
+      await QuoteService.saveQuotesToLocal(quotes);
+
+      setState(() {
+        isSaved = true;
+      });
+    }
   }
 }

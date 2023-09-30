@@ -1,13 +1,27 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Quote {
   final String text;
   final String author;
 
   Quote(this.text, this.author);
-}
 
+  Map<String, dynamic> toJson() {
+    return {
+      'text': text,
+      'author': author,
+    };
+  }
+
+  factory Quote.fromJson(Map<String, dynamic> json) {
+    return Quote(
+      json['text'],
+      json['author'],
+    );
+  }
+}
 class QuoteService {
   static Future<Quote> getQuote() async {
     String category = 'happiness';
@@ -35,5 +49,22 @@ class QuoteService {
     } catch (e) {
       return Quote('Error', 'Error fetching quote: $e');
     }
+  }
+
+// Function to save a list of quotes to local storage
+  static Future<void> saveQuotesToLocal(List<Quote> quotes) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> quoteData = quotes.map((quote) => jsonEncode(quote.toJson())).toList();
+    await prefs.setStringList('quotes', quoteData);
+  }
+
+  // Function to load quotes from local storage
+  static Future<List<Quote>> loadQuotesFromLocal() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List<String> quoteData = prefs.getStringList('quotes') ?? [];
+    return quoteData.map((data) {
+      Map<String, dynamic> json = jsonDecode(data);
+      return Quote.fromJson(json);
+    }).toList();
   }
 }
