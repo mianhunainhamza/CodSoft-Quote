@@ -2,10 +2,10 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:quote_app/screens/quote_preview.dart';
-import 'package:quote_app/widgets/drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../models/quote.dart';
+import '../widgets/drawer.dart';
 
 class FavouriteQuote extends StatefulWidget {
   const FavouriteQuote({Key? key}) : super(key: key);

@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 import '../models/quote.dart';
 
 class QuotePreview extends StatelessWidget {
@@ -79,7 +80,8 @@ class QuotePreview extends StatelessWidget {
               child: GestureDetector(
                   onTap: ()
                   {
-                  // _shareQuote();
+                    Share.share(
+                        '${quote!.text}\n- ${quote!.author}');
                   },
                   child: const Icon(CupertinoIcons.share, color: CupertinoColors.white, size: 35,)),
             ),
